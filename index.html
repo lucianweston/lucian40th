@@ -447,7 +447,7 @@
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbwcAa_n3mZew-G1SrkLh1vG3VrVX2KudvCKUXz76ZrTMNI5elEwSAdejtV4qdjdF_cW/exec') {
+    if (!SCRIPT_URL) {
       alert('Please add your Google Script URL first.');
       return;
     }
