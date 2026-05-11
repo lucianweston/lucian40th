@@ -300,18 +300,10 @@
     }
     #welcome-box h2 {
       font-family: 'Abril Fatface', serif;
-      font-size: 2rem;
+      font-size: 2.4rem;
       color: var(--rust);
-      margin-bottom: 12px;
+      margin: 0;
       line-height: 1.15;
-    }
-    #welcome-box p {
-      font-family: 'Playfair Display', serif;
-      font-style: italic;
-      font-size: 1rem;
-      color: var(--charcoal);
-      opacity: 0.8;
-      line-height: 1.6;
     }
 
   </style>
@@ -320,9 +312,9 @@
 
 <!-- ── WELCOME POPUP ── -->
 <div id="welcome-overlay">
+  <canvas id="welcome-canvas" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9998;"></canvas>
   <div id="welcome-box">
-    <h2>Welcome!</h2>
-    <p>We look forward to celebrating with you!</p>
+    <h2 id="party-heading">🎉 Party!</h2>
   </div>
 </div>
 
@@ -466,44 +458,88 @@
 <script>
   (function() {
     var overlay = document.getElementById('welcome-overlay');
-    var box = document.getElementById('welcome-box');
-    var colors = ['#B85C2A','#C8953A','#4A6741','#D4784A','#2C2825','#e8c07a','#8B7355'];
-    var sparks = [];
+    var canvas = document.getElementById('welcome-canvas');
+    var ctx = canvas.getContext('2d');
+    var heading = document.getElementById('party-heading');
+    var particleColors = ['#B85C2A','#C8953A','#4A6741','#D4784A','#e8c07a','#c94070','#5588cc','#ffffff'];
+    var strobeColors = ['#B85C2A','#C8953A','#4A6741','#c94070','#5588cc','#8B7355'];
+    var colorIdx = 0;
+    var particles = [];
+    var animFrame;
 
-    // Create sparks
-    for (var i = 0; i < 30; i++) {
-      var s = document.createElement('div');
-      var angle = Math.random() * Math.PI * 2;
-      var speed = 80 + Math.random() * 120;
-      s.style.cssText = 'position:absolute;width:7px;height:7px;border-radius:50%;pointer-events:none;' +
-        'background:' + colors[Math.floor(Math.random() * colors.length)] + ';' +
-        'left:50%;top:50%;transform:translate(-50%,-50%);opacity:1;';
-      overlay.appendChild(s);
-      sparks.push({ el: s, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, x: 0, y: 0, life: 0 });
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    function getHeadingOrigin() {
+      var r = heading.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
     }
 
-    var startTime = null;
-    var duration = 900;
+    function burst(ox, oy) {
+      for (var i = 0; i < 12; i++) {
+        var angle = Math.random() * Math.PI * 2;
+        var speed = 80 + Math.random() * 180;
+        particles.push({
+          x: ox, y: oy,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          color: particleColors[Math.floor(Math.random() * particleColors.length)],
+          life: 1,
+          size: 8 + Math.random() * 8,
+          decay: 0.014 + Math.random() * 0.010
+        });
+      }
+    }
 
-    function animate(ts) {
-      if (!startTime) startTime = ts;
-      var elapsed = ts - startTime;
-      var progress = Math.min(elapsed / duration, 1);
-      sparks.forEach(function(sp) {
-        var t = progress;
-        sp.el.style.transform = 'translate(calc(-50% + ' + (sp.vx * t) + 'px), calc(-50% + ' + (sp.vy * t + 60 * t * t) + 'px))';
-        sp.el.style.opacity = 1 - t;
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(function(p) {
+        p.x += p.vx * 0.016;
+        p.y += p.vy * 0.016;
+        p.vy += 80 * 0.016;
+        p.life -= p.decay;
+        var r = Math.max(0, p.size * p.life);
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.color;
+        ctx.strokeStyle = 'rgba(0,0,0,0.18)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
       });
-      if (progress < 1) requestAnimationFrame(animate);
+      ctx.globalAlpha = 1;
+      particles = particles.filter(function(p) { return p.life > 0; });
+      animFrame = requestAnimationFrame(animate);
     }
-    requestAnimationFrame(animate);
+    animate();
 
-    // Auto-close
+    // Strobe + burst every 150ms
+    var strobeInterval = setInterval(function() {
+      colorIdx = (colorIdx + 1) % strobeColors.length;
+      heading.style.color = strobeColors[colorIdx];
+      heading.style.opacity = heading.style.opacity === '0.2' ? '1' : '0.2';
+      var o = getHeadingOrigin();
+      burst(o.x, o.y);
+    }, 150);
+
+    // Auto-close after 4 seconds
     setTimeout(function() {
+      clearInterval(strobeInterval);
+      heading.style.opacity = '1';
+      heading.style.color = '';
       overlay.style.transition = 'opacity 0.6s ease';
       overlay.style.opacity = '0';
-      setTimeout(function() { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 700);
-    }, 1500);
+      setTimeout(function() {
+        cancelAnimationFrame(animFrame);
+        if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
+      }, 700);
+    }, 4000);
   })();
 </script>
 
