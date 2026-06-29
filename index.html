@@ -313,7 +313,7 @@
 <!-- ── WELCOME POPUP ── -->
 <div id="welcome-overlay">
   <div id="welcome-box">
-    <h2 id="party-heading">🎉 Party!</h2>
+    <h2 id="party-heading"></h2>
   </div>
 </div>
 
@@ -337,7 +337,7 @@
     </div>
     <div class="detail-item">
       <div class="d-label">Time</div>
-      <div class="d-value">6pm onwards to 2am</div>
+      <div class="d-value">6pm onwards to 1am</div>
     </div>
     <div class="detail-item">
       <div class="d-label">Venue</div>
@@ -345,70 +345,14 @@
     </div>
   </div>
 
-  <!-- RSVP Card -->
-  <div class="card">
-    <p class="card-title">Please RSVP by Sunday 17th May</p>
-    <p class="card-note">One RSVP per couple</p>
-
-    <form id="rsvp-form">
-      <div class="field">
-        <label for="name">Full name <span class="req">*</span></label>
-        <input type="text" id="name" name="name" placeholder="Your name" required autocomplete="name" />
-      </div>
-
-      <div class="field">
-        <label>Will you be joining us? <span class="req">*</span></label>
-        <div class="radio-group">
-          <input type="radio" id="att-yes" name="attending" value="Yes, I'll be there!" required />
-          <label for="att-yes">Joyfully accepts</label>
-          <input type="radio" id="att-no" name="attending" value="Sadly can't make it" />
-          <label for="att-no">Regretfully declines</label>
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="dietary">Your dietary requirements or allergies</label>
-        <input type="text" id="dietary" name="dietary" placeholder="e.g. vegetarian, nut allergy — leave blank if none" />
-      </div>
-
-      <div class="field" style="margin-top:8px;">
-        <label for="partner_name">Partner's name</label>
-        <input type="text" id="partner_name" name="partner_name" placeholder="Leave blank if coming solo" />
-      </div>
-      <div class="field">
-        <label>Will your partner be attending?</label>
-        <div class="radio-group">
-          <input type="radio" id="patt-yes" name="partner_attending" value="Yes, attending" />
-          <label for="patt-yes">Joyfully accepts</label>
-          <input type="radio" id="patt-no" name="partner_attending" value="Sadly can't make it" />
-          <label for="patt-no">Regretfully declines</label>
-        </div>
-      </div>
-      <div class="field">
-        <label for="partner_dietary">Partner's dietary requirements or allergies</label>
-        <input type="text" id="partner_dietary" name="partner_dietary" placeholder="e.g. gluten free — leave blank if none" />
-      </div>
-
-      <div class="field" style="margin-top:24px;">
-        <label for="message">A message for Lucian</label>
-        <textarea id="message" name="message" placeholder="Anything you'd like to say…"></textarea>
-      </div>
-
-      <button type="submit" class="btn-submit" id="submit-btn">Send my RSVP</button>
-    </form>
-
-    <div id="success-msg">
-      <div class="check">&#x1F389;</div>
-      <h2>Thank you for your response.</h2>
-      <p>Check back to this website for updates as the date nears. We look forward to celebrating with you on the 4th! &#x1F973;</p>
-    </div>
-  </div><!-- /.card -->
-
   <!-- Top Tips Card -->
   <div class="card">
     <p class="card-title">Top Tips</p>
     <p class="card-note">Check this website for any further updates as the date nears</p>
     <ul class="info-list">
+      <li><span class="info-icon">&#x1F378;</span><span>Drinks 6pm – 8pm</span></li>
+      <li><span class="info-icon">&#x1F37D;&#xFE0F;</span><span>Dinner at 8pm followed by dancing</span></li>
+      <li><span class="info-icon">&#x1F3C0;</span><span>Carriages at 1am (realised that nowadays 2am is unrealistic)</span></li>
       <li><span class="info-icon">&#x26FA;</span><span>Camping and parking is available in a field</span></li>
       <li><span class="info-icon">&#x1F695;</span><span>Around 45 mins drive from London</span></li>
       <li><span class="info-icon">&#x1F682;</span><span>Hildenborough station 5 mins and Sevenoaks 10 mins</span></li>
@@ -421,43 +365,31 @@
 
 
 <footer>
-  Romshed Farm, TN15 0SD &middot; Saturday 4th July 2026 &middot; 6pm onwards to 2am
+  Romshed Farm, TN15 0SD &middot; Saturday 4th July 2026 &middot; 6pm onwards to 1am
 </footer>
-
-<script>
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwcAa_n3mZew-G1SrkLh1vG3VrVX2KudvCKUXz76ZrTMNI5elEwSAdejtV4qdjdF_cW/exec';
-
-  // All fields always visible
-
-  // Partner fields are always visible (optional)
-
-  // Form submission
-  const form = document.getElementById('rsvp-form');
-  const btn = document.getElementById('submit-btn');
-  const successMsg = document.getElementById('success-msg');
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (!SCRIPT_URL) {
-      alert('Please add your Google Script URL first.');
-      return;
-    }
-    btn.disabled = true;
-    btn.textContent = 'Sending…';
-    const params = new URLSearchParams(new FormData(form));
-    fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: params }).catch(() => {});
-    setTimeout(() => {
-      form.style.display = 'none';
-      successMsg.style.display = 'block';
-    }, 1200);
-  });
-</script>
 
 
 <script>
   (function() {
     var overlay = document.getElementById('welcome-overlay');
     var heading = document.getElementById('party-heading');
+
+    // Calculate days until 4th July 2026
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    var party = new Date('2026-07-04');
+    party.setHours(0, 0, 0, 0);
+    var diffMs = party - today;
+    var days = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+    if (days > 0) {
+      heading.textContent = '🎉 ' + days + ' day' + (days === 1 ? '' : 's') + ' to go!';
+    } else if (days === 0) {
+      heading.textContent = '🎉 It\'s today!';
+    } else {
+      heading.textContent = '🎉 Party time!';
+    }
+
     var strobeColors = ['#B85C2A','#C8953A','#4A6741','#c94070','#5588cc','#8B7355'];
     var colorIdx = 0;
 
